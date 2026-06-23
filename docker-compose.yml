@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+
+  mongodb:
+    image: mongo:latest
+    container_name: amazona-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    # التعديل هنا: تفعيل الحماية بـ Username و Password
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    image: amazona-backend
+    container_name: amazona-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      # الرابط هنا صحيح ومطابق للبيانات بالأعلى ولأسم الكونتينر
+      MONGODB_URL: mongodb://admin:password@amazona-mongodb:27017/amazona?authSource=admin
+    depends_on:
+      - mongodb
+
+  frontend:
+    image: amazona-frontend
+    container_name: amazona-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
