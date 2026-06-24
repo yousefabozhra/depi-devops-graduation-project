@@ -1,0 +1,34 @@
+services:
+
+  mongodb:
+    image: mongo:latest
+    container_name: amazona-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+
+  backend:
+    image: yousefabozahra/amazona-backend:latest
+    container_name: amazona-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/amazona
+    depends_on:
+      - mongodb
+
+
+  frontend:
+    image: yousefabozahra/amazona-frontend:latest
+    container_name: amazona-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+
+volumes:
+  mongo-data:
