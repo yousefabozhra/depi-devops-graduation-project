@@ -17,7 +17,6 @@ spec:
         app: amazona-frontend
 
     spec:
-
       containers:
 
       - name: frontend
@@ -25,5 +24,4 @@ spec:
         image: 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:latest
 
         ports:
-
-        - containerPort: 3000
+        - containerPort: 80

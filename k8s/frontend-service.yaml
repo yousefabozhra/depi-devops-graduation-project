@@ -9,11 +9,9 @@ spec:
   type: LoadBalancer
 
   selector:
-
     app: amazona-frontend
 
   ports:
 
   - port: 80
-
-    targetPort: 3000
+    targetPort: 80
