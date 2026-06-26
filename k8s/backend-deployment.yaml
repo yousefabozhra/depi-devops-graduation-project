@@ -7,6 +7,9 @@ metadata:
 spec:
   replicas: 2
 
+  strategy:
+    type: Recreate
+
   selector:
     matchLabels:
       app: amazona-backend
@@ -34,6 +37,7 @@ spec:
             secretKeyRef:
               name: amazona-backend-secret
               key: MONGODB_URL
+
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
