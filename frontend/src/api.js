@@ -16,7 +16,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-
   (error) => {
 
     console.error(
@@ -25,7 +24,6 @@ api.interceptors.response.use(
     );
 
     return Promise.reject(error);
-
   }
 );
 
