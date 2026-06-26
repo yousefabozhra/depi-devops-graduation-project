@@ -4,11 +4,9 @@
  */
 
 import express from 'express';
-import path from 'path';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { fileURLToPath } from 'url';
 
 import config from './config.js';
 
@@ -16,10 +14,6 @@ import userRoute from './routes/userRoute.js';
 import productRoute from './routes/productRoute.js';
 import orderRoute from './routes/orderRoute.js';
 import uploadRoute from './routes/uploadRoute.js';
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 
 // ----------------------------------------------------------------------------
@@ -62,6 +56,7 @@ const corsOptions = {
 
   },
 
+
   methods: [
     'GET',
     'POST',
@@ -70,15 +65,18 @@ const corsOptions = {
     'OPTIONS'
   ],
 
+
   allowedHeaders: [
     'Content-Type',
     'Authorization',
     'X-Requested-With'
   ],
 
-  credentials: true,
+
+  credentials: true
 
 };
+
 
 
 app.use(cors(corsOptions));
@@ -93,9 +91,11 @@ app.use(bodyParser.json());
 
 app.use((req, res, next) => {
 
+
   console.log(
     `${new Date().toISOString()} - ${req.method} ${req.url} - Host: ${req.get('host')}`
   );
+
 
   next();
 
@@ -104,11 +104,12 @@ app.use((req, res, next) => {
 
 
 // ----------------------------------------------------------------------------
-// Health Checks
+// Health Check
 // ----------------------------------------------------------------------------
 
 
 app.get('/api/health', (req, res) => {
+
 
   res.status(200).json({
 
@@ -123,7 +124,10 @@ app.get('/api/health', (req, res) => {
 
   });
 
+
 });
+
+
 
 
 
@@ -134,7 +138,9 @@ app.get('/api/test', (req, res) => {
 
     message: 'API is working!',
 
+
     host: req.get('host'),
+
 
     ip: req.ip,
 
@@ -160,6 +166,7 @@ app.get('/api/test', (req, res) => {
 
 
 
+
 // ----------------------------------------------------------------------------
 // API Routes
 // ----------------------------------------------------------------------------
@@ -176,11 +183,17 @@ app.use('/api/orders', orderRoute);
 
 
 
+
+// ----------------------------------------------------------------------------
 // Paypal Config
+// ----------------------------------------------------------------------------
+
 
 app.get('/api/config/paypal', (req, res) => {
 
+
   res.send(config.PAYPAL_CLIENT_ID);
+
 
 });
 
@@ -188,18 +201,17 @@ app.get('/api/config/paypal', (req, res) => {
 
 
 
-// ----------------------------------------------------------------------------
-// Static Files
-// ----------------------------------------------------------------------------
 
-
-app.use('/uploads', express.static('uploads'));
+// ----------------------------------------------------------------------------
+// Static Upload Files Only
+// ----------------------------------------------------------------------------
 
 app.use(
-  express.static(
-    path.join(__dirname, '/../frontend/build')
-  )
+  '/uploads',
+  express.static('uploads')
 );
+
+
 
 
 
@@ -217,6 +229,7 @@ app.use((error, req, res, next) => {
 
   res.status(error.status || 500).json({
 
+
     message: error.message,
 
 
@@ -225,34 +238,12 @@ app.use((error, req, res, next) => {
         ? {}
         : error
 
+
   });
 
 
 });
 
-
-
-
-
-// ----------------------------------------------------------------------------
-// Frontend SPA Fallback
-// ----------------------------------------------------------------------------
-
-
-app.get('*', (req, res) => {
-
-
-  res.sendFile(
-
-    path.join(
-      __dirname,
-      '../frontend/build/index.html'
-    )
-
-  );
-
-
-});
 
 
 
@@ -267,7 +258,7 @@ app.listen(config.PORT, () => {
 
 
   console.log(
-    `🚀 Server started at http://localhost:${config.PORT}`
+    `🚀 Server started on port ${config.PORT}`
   );
 
 
