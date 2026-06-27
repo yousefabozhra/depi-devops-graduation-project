@@ -1,64 +1,179 @@
 name: CI/CD Pipeline
 
+
 on:
+
   push:
+
     branches:
+
       - main
+
 
 
 jobs:
 
-  build-and-push:
+
+  build-and-deploy:
+
 
     runs-on: ubuntu-latest
+
 
 
     steps:
 
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+
+    - name: Checkout
+
+      uses: actions/checkout@v4
 
 
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+
+
+    - name: Configure AWS
+
+      uses: aws-actions/configure-aws-credentials@v4
+
+      with:
+
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+        aws-region: us-east-1
 
 
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
+
+
+    - name: Login ECR
+
+      uses: aws-actions/amazon-ecr-login@v2
 
 
 
-      - name: Build backend image
-        run: |
-          docker build \
-          -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:latest \
-          ./backend
+
+
+    - name: Build Backend
+
+
+      run:
+
+        docker build \
+        -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }} \
+        ./backend
 
 
 
-      - name: Push backend image
-        run: |
-          docker push \
-          781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:latest
+
+
+    - name: Push Backend
+
+
+      run:
+
+
+        docker push \
+        781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }}
 
 
 
-      - name: Build frontend image
-        run: |
-          docker build \
-          -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:latest \
-          ./frontend
 
 
 
-      - name: Push frontend image
-        run: |
-          docker push \
-          781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:latest
+    - name: Build Frontend
+
+
+      run:
+
+
+        docker build \
+        -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }} \
+        ./frontend
+
+
+
+
+
+    - name: Push Frontend
+
+
+      run:
+
+
+        docker push \
+        781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }}
+
+
+
+
+
+
+    - name: Configure kubectl
+
+
+      run:
+
+
+        aws eks update-kubeconfig \
+
+        --name amazona-cluster \
+
+        --region us-east-1
+
+
+
+
+
+
+    - name: Deploy Kubernetes
+
+
+      run:
+
+
+        kubectl apply -f k8s/
+
+
+
+
+
+
+    - name: Update Backend Image
+
+
+      run:
+
+
+        kubectl set image deployment/amazona-backend \
+
+        backend=781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }}
+
+
+
+
+
+
+    - name: Restart Frontend
+
+
+      run:
+
+
+        kubectl rollout restart deployment amazona-frontend
+
+
+
+
+
+
+    - name: Check Rollout
+
+
+      run:
+
+
+        kubectl rollout status deployment amazona-backend
