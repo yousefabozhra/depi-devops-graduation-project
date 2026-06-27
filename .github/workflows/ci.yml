@@ -71,11 +71,9 @@ jobs:
     - name: Push Backend
 
 
-      run:
+      run: |
 
-
-        docker push \
-        781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }}
+        docker push 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }}
 
 
 
