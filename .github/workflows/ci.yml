@@ -62,9 +62,7 @@ jobs:
 
       run:
 
-        docker build \
-        -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }} \
-        ./backend
+        docker build -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }} ./backend
 
 
 
