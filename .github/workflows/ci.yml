@@ -33,7 +33,7 @@ jobs:
 
 
 
-    - name: Configure AWS
+    - name: Configure AWS credentials
 
       uses: aws-actions/configure-aws-credentials@v4
 
@@ -49,7 +49,7 @@ jobs:
 
 
 
-    - name: Login ECR
+    - name: Login to Amazon ECR
 
       uses: aws-actions/amazon-ecr-login@v2
 
@@ -57,19 +57,19 @@ jobs:
 
 
 
-    - name: Build Backend
+    - name: Build Backend Image
+
+      run: |
+
+        docker build \
+        -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }} \
+        ./backend
 
 
-      run:
-
-        docker build -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }} ./backend
 
 
 
-
-
-    - name: Push Backend
-
+    - name: Push Backend Image
 
       run: |
 
@@ -80,11 +80,9 @@ jobs:
 
 
 
-    - name: Build Frontend
+    - name: Build Frontend Image
 
-
-      run:
-
+      run: |
 
         docker build \
         -t 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }} \
@@ -94,14 +92,11 @@ jobs:
 
 
 
-    - name: Push Frontend
+    - name: Push Frontend Image
 
+      run: |
 
-      run:
-
-
-        docker push \
-        781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }}
+        docker push 781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }}
 
 
 
@@ -110,26 +105,19 @@ jobs:
 
     - name: Configure kubectl
 
-
-      run:
-
+      run: |
 
         aws eks update-kubeconfig \
-
         --name amazona-cluster \
-
         --region us-east-1
 
 
 
 
 
+    - name: Deploy Kubernetes Files
 
-    - name: Deploy Kubernetes
-
-
-      run:
-
+      run: |
 
         kubectl apply -f k8s/
 
@@ -138,14 +126,11 @@ jobs:
 
 
 
-    - name: Update Backend Image
+    - name: Update Backend Deployment Image
 
-
-      run:
-
+      run: |
 
         kubectl set image deployment/amazona-backend \
-
         backend=781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-backend:${{ github.sha }}
 
 
@@ -153,11 +138,23 @@ jobs:
 
 
 
-    - name: Restart Frontend
+    - name: Update Frontend Deployment Image
+
+      run: |
+
+        kubectl set image deployment/amazona-frontend \
+        frontend=781195019583.dkr.ecr.us-east-1.amazonaws.com/amazona-frontend:${{ github.sha }}
 
 
-      run:
 
+
+
+
+    - name: Restart Deployments
+
+      run: |
+
+        kubectl rollout restart deployment amazona-backend
 
         kubectl rollout restart deployment amazona-frontend
 
@@ -166,10 +163,18 @@ jobs:
 
 
 
-    - name: Check Rollout
+    - name: Check Backend Rollout
 
-
-      run:
-
+      run: |
 
         kubectl rollout status deployment amazona-backend
+
+
+
+
+
+    - name: Check Frontend Rollout
+
+      run: |
+
+        kubectl rollout status deployment amazona-frontend
